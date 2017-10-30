@@ -1,7 +1,16 @@
 #pragma once
 
-#include <cblas.h>
 #include <complex>
+
+#include <cblas.h>
+
+
+
+#define lapack_complex_float std::complex<float>
+#define lapack_complex_double std::complex<double>
+
+#include <lapacke.h>
+
 
 namespace BlasWrapper
 {
@@ -27,7 +36,7 @@ namespace BlasWrapper
 
 	inline static void copy(int n, const int *x, int incx, int *y, int incy)
 	{
-		for (int i = 0; i<n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			y[i*incy] = x[i*incx];
 		}
@@ -41,6 +50,16 @@ namespace BlasWrapper
 	inline static void scale(int n, double alpha, double *x, int incx)
 	{
 		cblas_dscal(n, alpha, x, incx);
+	}
+
+	inline static void scale(int n, const std::complex<float> alpha, std::complex<float> *x, int incx)
+	{
+		cblas_cscal(n, reinterpret_cast<const float*>(&alpha), reinterpret_cast<float*>(x), incx);
+	}
+
+	inline static void scale(int n, const std::complex<double> alpha, std::complex<double> *x, int incx)
+	{
+		cblas_zscal(n, reinterpret_cast<const double*>(&alpha), reinterpret_cast<double*>(x), incx);
 	}
 
 	//! @param trans : gibt an ob A transponiert ist oder nicht. Sei trans = 'N' oder 'n' so ist op(A)= A, sei trans = 'T', 't','C' oder 'c' so ist op(A)= trans(A)
@@ -171,8 +190,95 @@ namespace BlasWrapper
 			reinterpret_cast<double*>(C), ldc);
 	}
 
-	inline static void inv()
+	inline static void omatcopy(char trans, int crows, int ccols, float calpha, const float* a, int clda, float* b, int cldb)
 	{
-		
+		CBLAS_TRANSPOSE tr = (((trans == 't') || (trans == 'T')) ? CblasTrans : ((trans == 'c') || (trans == 'C')) ? CblasConjTrans : CblasNoTrans);
+		cblas_somatcopy(CBLAS_ORDER::CblasColMajor, tr, crows, ccols, calpha, a, clda, b, cldb);
 	}
+
+	inline static void omatcopy(char trans, int crows, int ccols, double calpha, const double* a, int clda, double* b, int cldb)
+	{
+		CBLAS_TRANSPOSE tr = (((trans == 't') || (trans == 'T')) ? CblasTrans : ((trans == 'c') || (trans == 'C')) ? CblasConjTrans : CblasNoTrans);
+		cblas_domatcopy(CBLAS_ORDER::CblasColMajor, tr, crows, ccols, calpha, a, clda, b, cldb);
+	}
+
+	inline static void omatcopy(char trans, int crows, int ccols, const std::complex<float> calpha, const std::complex<float>* a, int clda, std::complex<float>* b, int cldb)
+	{
+		CBLAS_TRANSPOSE tr = (((trans == 't') || (trans == 'T')) ? CblasTrans : ((trans == 'c') || (trans == 'C')) ? CblasConjTrans : CblasNoTrans);
+		cblas_comatcopy(CBLAS_ORDER::CblasColMajor, tr, crows, ccols, reinterpret_cast<const float*>(&calpha),
+			reinterpret_cast<const float*>(&a), clda, reinterpret_cast<float*>(&b), cldb);
+	}
+
+	inline static void omatcopy(char trans, int crows, int ccols, const std::complex<double> calpha, const std::complex<double>* a, int clda, std::complex<double>* b, int cldb)
+	{
+		CBLAS_TRANSPOSE tr = (((trans == 't') || (trans == 'T')) ? CblasTrans : ((trans == 'c') || (trans == 'C')) ? CblasConjTrans : CblasNoTrans);
+		cblas_zomatcopy(CBLAS_ORDER::CblasColMajor, tr, crows, ccols, reinterpret_cast<const double*>(&calpha),
+			reinterpret_cast<const double*>(&a), clda, reinterpret_cast<double*>(&b), cldb);
+	}
+
+	inline static int geev(char jobvl, char jobvr, int N, float* A, int lda, float* wr, float* wi, float* vl, int ldvl, float* vr, int ldvr)
+	{
+		return LAPACKE_sgeev(CblasColMajor, jobvl, jobvr, N, A, lda, wr, wi, vl, ldvl, vr, ldvr);
+	}
+
+	inline static int geev(char jobvl, char jobvr, int N, double* A, int lda, double* wr, double* wi, double* vl, int ldvl, double* vr, int ldvr)
+	{
+		return LAPACKE_dgeev(CblasColMajor, jobvl, jobvr, N, A, lda, wr, wi, vl, ldvl, vr, ldvr);
+	}
+
+	inline static int geev(char jobvl, char jobvr, int N, std::complex<float>* A, int lda, std::complex<float>* w, std::complex<float>* vl, int ldvl, std::complex<float>* vr, int ldvr)
+	{
+		return LAPACKE_cgeev(CblasColMajor, jobvl, jobvr, N, A, lda, w, vl, ldvl, vr, ldvr);
+	}
+
+	inline static int geev(char jobvl, char jobvr, int N, std::complex<double>* A, int lda, std::complex<double>* w, std::complex<double>* vl, int ldvl, std::complex<double>* vr, int ldvr)
+	{
+		return LAPACKE_zgeev(CblasColMajor, jobvl, jobvr, N, A, lda, w, vl, ldvl, vr, ldvr);
+	}
+
+
+	inline static int gesvd(char jobu, char jobvt, int m, int n, float* A, int lda, float* s, float* u, int ldu, float* vt, int ldvt, float* superb)
+	{
+		return LAPACKE_sgesvd(CblasColMajor, jobu, jobvt, m, n, A, lda, s, u, ldu, vt, ldvt, superb);
+	}
+
+	inline static int gesvd(char jobu, char jobvt, int m, int n, double* A, int lda, double* s, double* u, int ldu, double* vt, int ldvt, double* superb)
+	{
+		return LAPACKE_dgesvd(CblasColMajor, jobu, jobvt, m, n, A, lda, s, u, ldu, vt, ldvt, superb);
+	}
+
+	inline static int gesvd(char jobu, char jobvt, int m, int n, std::complex<float>* A, int lda, float* s, std::complex<float>* u,
+		int ldu, std::complex<float>* vt, int ldvt, float* superb)
+	{
+		return LAPACKE_cgesvd(CblasColMajor, jobu, jobvt, m, n, A, lda, s, u, ldu, vt, ldvt, superb);
+	}
+
+	inline static int gesvd(char jobu, char jobvt, int m, int n, std::complex<double>* A, int lda, double* s, std::complex<double>* u,
+		int ldu, std::complex<double>* vt, int ldvt, double* superb)
+	{
+		return LAPACKE_zgesvd(CblasColMajor, jobu, jobvt, m, n, A, lda, s, u, ldu, vt, ldvt, superb);
+	}
+
+	inline static float dot(int n, const float* x, int incx, const float* y, int incy)
+	{
+		return cblas_sdot(n, x, incx, y, incy);
+	}
+
+	inline static double dot(int n, const double* x, int incx, const double* y, int incy)
+	{
+		return cblas_ddot(n, x, incx, y, incy);
+	}
+
+	inline static std::complex<float> dot(int n, const std::complex<float>* x, int incx, const std::complex<float>* y, int incy)
+	{
+		auto result = cblas_cdotu(n, reinterpret_cast<const float*>(x), incx, reinterpret_cast<const float*>(y), incy);
+		return std::complex<float>(result.real, result.imag);
+	}
+
+	inline static std::complex<double> dot(int n, const std::complex<double>* x, int incx, const std::complex<double>* y, int incy)
+	{
+		auto result = cblas_zdotu(n, reinterpret_cast<const double*>(x), incx, reinterpret_cast<const double*>(y), incy);
+		return std::complex<double>(result.real, result.imag);
+	}
+
 }

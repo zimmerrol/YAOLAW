@@ -1,12 +1,7 @@
 #include "stdafx.h"
 #include "vector.h"
 
-template <typename T>
-Vector<T>::Vector()
+namespace LA
 {
-}
 
-template <typename T>
-Vector<T>::~Vector()
-{
 }
