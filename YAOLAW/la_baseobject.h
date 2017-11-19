@@ -106,6 +106,12 @@ namespace LA
 			return *this;
 		}
 
+		LABaseObject<T>& operator/=(const T& value)
+		{
+			this->scale(1.0/value, *this);
+			return *this;
+		}
+
 		LABaseObject<T>& operator+=(const T& value)
 		{
 			size_t nElements = this->getNRows() * this->getNCols();
@@ -238,5 +244,26 @@ namespace LA
 
 			return dest;
 		}
+
+		friend LABaseObject<T> operator/(const LABaseObject<T>& larg, const T& rarg)
+		{
+			LABaseObject<T> dest(larg);
+			size_t nElements = larg->getNRows() * larg->getNCols();
+			for (size_t i = 0; i < nElements; i++)
+			{
+				dest->m_data.get()[i] /= rarg;
+			}
+
+			return dest;
+		}
+
+		/*void operator=(const T& rarg)
+		{
+			size_t nElements = getNRows() * getNCols();
+			for (size_t i = 0; i < nElements; i++)
+			{
+				m_data.get()[i] *= rarg;
+			}
+		}*/
 	};
 }
