@@ -6,6 +6,18 @@
 namespace LA
 {
 	template <typename T>
+	struct getInnerType
+	{
+		using type = T;
+	};
+
+	template <typename T>
+	struct getInnerType<std::complex<T>>
+	{
+		using type = T;
+	};
+
+	template <typename T>
 	class Matrix;
 
 	template <typename T>
@@ -15,13 +27,20 @@ namespace LA
 	protected:
 		bool m_isColumnVector;
 	public:
-		Vector(const size_t n, bool columnVector=true) : LABaseObject<T>(columnVector ? n: 1, columnVector ? 1 : n), m_isColumnVector(columnVector){}
-		Vector() : LABaseObject<T>(), m_isColumnVector(false){}
-		Vector(const Vector<T>& _other) : LABaseObject<T>(_other), m_isColumnVector(_other.m_isColumnVector){}
-		Vector(std::vector<T> value, bool isColumnVector=true) : this(value.size(), isColumnVector)
-		{
+		using innerT = typename getInnerType<T>::type;
 
+		Vector(const size_t n, bool columnVector = true) : LABaseObject<T>(columnVector ? n : 1, columnVector ? 1 : n), m_isColumnVector(columnVector) {}
+		Vector() : LABaseObject<T>(), m_isColumnVector(false) {}
+		Vector(const Vector<T>& _other) : LABaseObject<T>(_other), m_isColumnVector(_other.m_isColumnVector) {}
+
+		Vector(std::vector<T> value, bool isColumnVector = true) : this(value.size(), isColumnVector)
+		{
+			for (size_t i = 0; i < value.size(); i++)
+			{
+				this->operator()(i) = value[i];
+			}
 		}
+
 
 		size_t getSize() const
 		{
@@ -33,6 +52,17 @@ namespace LA
 			auto result = Vector<T>(this->getSize(), !this->m_isColumnVector);
 			result.copyDataFrom(*this);
 			return result;
+		}
+
+		innerT norm()
+		{
+			size_t size = getSize();
+			innerT result = 0.0;
+			for (size_t i = 0; i < size; i++)
+			{
+				result += std::norm(this->operator()(i));
+			}
+			return std::sqrt(result);
 		}
 
 		void resize(size_t n)
@@ -73,12 +103,13 @@ namespace LA
 			if (!rarg.m_isColumnVector)
 				throw std::runtime_error("Vector has to be column wise.");
 			if (larg.getNCols() != rarg.getSize())
-				throw std::runtime_error("Number of matrix columns (" + std::to_string(larg.getNCols()) +") does not match the size of the vector (" + std::to_string(rarg.getSize()) + ").");
+				throw std::runtime_error("Number of matrix columns (" + std::to_string(larg.getNCols()) + ") does not match the size of the vector (" + std::to_string(rarg.getSize()) + ").");
 			auto result = Vector<T>(larg.getNRows());
-			BlasWrapper::gemv('n', larg.getNRows(), larg.getNCols(), 1.0, larg.getDataPtr(), larg.getLeadingDim(), rarg.getDataPtr(), 1, 0.0, result.getDataPtr(), 1);
+			BlasWrapper::gemv('n', larg.getNRows(), larg.getNCols(), (T)1.0, larg.getDataPtr(), larg.getLeadingDim(), rarg.getDataPtr(), 1, (T)0.0, result.getDataPtr(), 1);
 			return result;
 		}
 
+		//TODO: fix!
 		friend Vector<T> operator*(const Vector<T>& larg, const Matrix<T>& rarg)
 		{
 			if (larg.m_isColumnVector)
@@ -91,5 +122,48 @@ namespace LA
 
 			return result;
 		}
+		
+
+		friend Vector<T> operator+(const Vector<T>& larg, const Vector<T>&  rarg)
+		{
+			Vector<T> dest(larg);
+			(LABaseObject<T>&)(dest) += (const LABaseObject<T>&)rarg;
+			return dest;
+		}
+
+		friend Vector<T> operator-(const Vector<T>& larg, const Vector<T>&  rarg)
+		{
+			Vector<T> dest(larg);
+			(LABaseObject<T>&)(dest) -= (const LABaseObject<T>&)rarg;
+			return dest;
+		}
+
+		friend Vector<T> operator*(const Vector<T>& larg, const T& rarg)
+		{
+			Vector<T> dest(larg);
+			(LABaseObject<T>&)(dest) *= rarg;
+			return dest;
+		}
+
+		/*friend Vector<T> operator*(const T& larg, const Vector<T>& rarg)
+		{
+			Vector<T> dest(larg);
+			(LABaseObject<T>&)(dest) *= rarg;
+			return dest;
+		}*/
+
+		friend Vector<T> operator/(const Vector<T>& larg, const T& rarg)
+		{
+			Vector<T> dest(larg);
+			(LABaseObject<T>&)(dest) /= rarg;
+			return dest;
+		}
+
+		/*	friend Vector<T> operator/(const T& larg, const Vector<T>& rarg)
+			{
+				Vector<T> dest(larg);
+				(LABaseObject<T>&)(dest) /= rarg;
+				return dest;
+			}*/
 	};
 }

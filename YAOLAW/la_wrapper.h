@@ -98,7 +98,7 @@ namespace BlasWrapper
 		std::complex<float> *y, int incy)
 	{
 		CBLAS_TRANSPOSE tr = (((trans == 't') || (trans == 'T')) ? CblasTrans : CblasNoTrans);
-		//cblas_cgemv(CblasColMajor, tr, m, n, &alpha, A, lda, x, incx, &beta, y, incy);
+		cblas_cgemv(CblasColMajor, tr, m, n, reinterpret_cast<const float*>(&alpha), reinterpret_cast<const float*>(A), lda, reinterpret_cast<const float*>(x), incx, reinterpret_cast<const float*>(&beta), reinterpret_cast<float*>(y), incy);
 	}
 
 	inline static void gemv(char trans, int m, int n, std::complex<double> & alpha,
@@ -107,7 +107,7 @@ namespace BlasWrapper
 		std::complex<double> *y, int incy)
 	{
 		CBLAS_TRANSPOSE tr = (((trans == 't') || (trans == 'T')) ? CblasTrans : CblasNoTrans);
-		//cblas_zgemv(CblasColMajor, tr, m, n, &alpha, A, lda, x, incx, &beta, y, incy);
+		cblas_zgemv(CblasColMajor, tr, m, n, reinterpret_cast<const double*>(&alpha), reinterpret_cast<const double*>(A), lda, reinterpret_cast<const double*>(x), incx, reinterpret_cast<const double*>(&beta), reinterpret_cast<double*>(y), incy);
 	}
 
 
