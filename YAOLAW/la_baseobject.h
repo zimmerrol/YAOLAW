@@ -43,7 +43,9 @@ namespace LA
 
 		void copyDataFrom(const LABaseObject<T>& source)
 		{
-			this->resize(source.getNRows(), source.getNCols());
+			if (this->getNCols() * this->getNRows() != source.getNRows()* source.getNCols())
+				this->resize(source.getNRows(), source.getNCols());
+
 			BlasWrapper::copy((int)(source.getNRows() * source.getNCols()),
 				source.getDataPtr(),
 				1,

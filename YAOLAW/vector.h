@@ -1,6 +1,7 @@
 #pragma once
 #include "la_baseobject.h"
 #include <algorithm>
+#include <vector>
 
 namespace LA
 {
@@ -17,6 +18,10 @@ namespace LA
 		Vector(const size_t n, bool columnVector=true) : LABaseObject<T>(columnVector ? n: 1, columnVector ? 1 : n), m_isColumnVector(columnVector){}
 		Vector() : LABaseObject<T>(), m_isColumnVector(false){}
 		Vector(const Vector<T>& _other) : LABaseObject<T>(_other), m_isColumnVector(_other.m_isColumnVector){}
+		Vector(std::vector<T> value, bool isColumnVector=true) : this(value.size(), isColumnVector)
+		{
+
+		}
 
 		size_t getSize() const
 		{
@@ -71,6 +76,19 @@ namespace LA
 				throw std::runtime_error("Number of matrix columns (" + std::to_string(larg.getNCols()) +") does not match the size of the vector (" + std::to_string(rarg.getSize()) + ").");
 			auto result = Vector<T>(larg.getNRows());
 			BlasWrapper::gemv('n', larg.getNRows(), larg.getNCols(), 1.0, larg.getDataPtr(), larg.getLeadingDim(), rarg.getDataPtr(), 1, 0.0, result.getDataPtr(), 1);
+			return result;
+		}
+
+		friend Vector<T> operator*(const Vector<T>& larg, const Matrix<T>& rarg)
+		{
+			if (larg.m_isColumnVector)
+				throw std::runtime_error("Vector has to be row wise.");
+			if (larg.getNCols() != rarg.getNRows())
+				throw std::runtime_error("Vector size (" + std::to_string(larg.getSize()) + ") does not match the number of columns of the matrix (" + std::to_string(rarg.getNCols()) + ").");
+			auto result = Vector<T>(larg.getNCols(), false);
+			result -= 1;
+			BlasWrapper::gemm('n', 'n', 1, rarg.getNCols(), rarg.getNRows(), (T)1.0, larg.getDataPtr(), larg.getLeadingDim(), rarg.getDataPtr(), rarg.getNRows(), (T)0.0, result.getDataPtr(), result.getLeadingDim());
+
 			return result;
 		}
 	};
