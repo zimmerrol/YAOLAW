@@ -19,7 +19,7 @@ namespace LA
 
 		void EVD(std::vector<std::complex<T>>& eigenvalue, Matrix<T>& eigenvectors) const;
 		void SVD(Matrix<T>& U, Vector<T>& Sigma, Matrix<T>& Vt) const;
-		Matrix<T> Trans();
+		Matrix<T> transpose();
 		Matrix<T> directProduct(const Matrix<T>& rarg) const;
 
 		friend Matrix<T> operator *(const Matrix<T>& larg, const Matrix<T>& rarg)
@@ -62,7 +62,9 @@ namespace LA
 		Matrix<T>& inv();
 		void EVD(std::vector<T>& eigenvalues, Matrix<T>& eigenvectors) const;
 		void SVD(Matrix<T>& U, Vector<baseT>& Sigma, Matrix<T>& Vt) const;
-		Matrix<T> Trans();
+		Matrix<T> transpose();
+		Matrix<T> adjungate();
+
 		Matrix<T> directProduct(const Matrix<T>& rarg) const;
 		static Matrix<T> identity(size_t n);
 

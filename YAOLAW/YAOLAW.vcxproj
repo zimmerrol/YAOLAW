@@ -148,6 +148,7 @@
     <ClInclude Include="MathUtility.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="MatrixUtility.h" />
+    <ClInclude Include="MPSUtility.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="vector.h" />

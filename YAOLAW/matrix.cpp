@@ -99,7 +99,7 @@ namespace LA
 	}
 
 	template <typename T>
-	Matrix<T> Matrix<T>::Trans()
+	Matrix<T> Matrix<T>::transpose()
 	{
 		Matrix<T> result = Matrix<T>(this->getNRows(), this->getNCols());
 		BlasWrapper::omatcopy('T', this->getNRows(), this->getNCols(), (T)1.0, this->getDataPtr(), this->getNRows(), result.getDataPtr(), this->getNCols());
@@ -108,11 +108,24 @@ namespace LA
 	}
 
 	template <typename baseT>
-	Matrix<std::complex<baseT>> Matrix<std::complex<baseT>>::Trans()
+	Matrix<std::complex<baseT>> Matrix<std::complex<baseT>>::transpose()
 	{
 		Matrix<std::complex<baseT>> result = Matrix<std::complex<baseT>>(this->getNRows(), this->getNCols());
 		BlasWrapper::omatcopy('T', this->getNRows(), this->getNCols(), (T)1.0, this->getDataPtr(), this->getNRows(), result.getDataPtr(), this->getNCols());
 		result.resize(this->getNCols(), this->getNRows());
+		return result;
+	}
+
+	template <typename baseT>
+	Matrix<std::complex<baseT>> Matrix<std::complex<baseT>>::adjungate()
+	{
+		Matrix<std::complex<baseT>> result = this->transpose();
+		size_t nElements = this->getNCols() * this->getNRows();
+		for (size_t i = 0; i < nElements; i++)
+		{
+			result.getDataPtr()[i] = std::conj(result.getDataPtr()[i]);
+		}
+
 		return result;
 	}
 

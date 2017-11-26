@@ -39,6 +39,9 @@
     <ClInclude Include="MathUtility.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="MPSUtility.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

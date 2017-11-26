@@ -41,20 +41,25 @@ namespace LA
 				v_old = v;
 
 				T_ beta = w.norm();
-				if (!LA::MathUtility::approximateEqual(beta, 0))
+				if (!LA::MathUtility::approximateEqual(beta, 0, 1e-15))
 				{
 					v = w / beta;
 				}
 				else
 				{
 					std::cout << "WARNING: beta has vanished!" << std::endl;
+					std::cout << "Changing m from " << m << " to " << j << std::endl;
+					T.resize(j, j);
+
+					return;
+
 					//TODO:
 					//pick as {\displaystyle v_{j}} v_{j} an arbitrary vector with Euclidean norm {\displaystyle 1} 1 that is orthogonal
 					//to all of {\displaystyle v_{1},\dots ,v_{j-1}} {\displaystyle v_{1},\dots ,v_{j-1}}
 				}
 
 				w_prime = H * v;
-				alpha = w.transpose() * v;
+				alpha = w_prime.transpose() * v;
 				w = w_prime - v * alpha -  v_old * ((std::complex<T_>)beta); // 
 
 				T(j, j - 1) = beta;
